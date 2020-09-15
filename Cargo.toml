@@ -12,5 +12,14 @@ license = "Apache-2.0 OR MIT"
 readme = "README.md"
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-*"]
 
+[dependencies]
+thiserror = "1.0"
+
+[dev-dependencies]
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+serde_yaml = "0.8"
+property = "0.3"
+
 [badges]
 travis-ci = { repository = "yangby-cryptape/rust-handwritten-json" }

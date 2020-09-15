@@ -1,0 +1,56 @@
+- input: '[]'
+  expected: '[]'
+- input: '[ ]'
+  expected: '[]'
+- input: '[1]'
+  expected: '[1]'
+- input: '[ 1, 2 ]'
+  expected: '[1,2]'
+- input: '[ 1, 2, ]'
+  expected: '[1,2]'
+- input: '{}'
+  expected: '{}'
+- input: '{ }'
+  expected: '{}'
+- input: '{ "x": 1 }'
+  expected: '{"x":1}'
+- input: '{ "x": 1, }'
+  expected: '{"x":1}'
+- input: '{ x: 1 }'
+  expected: '{"x":1}'
+- input: '{ x: 1, }'
+  expected: '{"x":1}'
+- input: |
+    {
+        int: 123,
+        float: 0.456,
+        "array": [
+            { "x": 1e2,  y : -3e4,  z : 5e-6, 0: 8e+9, },
+            {  x : 1e2, "y": -3e4,  z : 5e-6, 0: 8e9, },
+            {  x : 1e2,  y : -3e4, "z": 5e-6, 0: 8e+9, },
+        ],
+        "object": {
+            bool: true,
+            string: "false",
+            array: ["\"this-is-a-string\"\n"],
+            null: null,
+        },
+        values: [ null, true, false ]
+    }
+  expected: |
+    {
+        "int": 123,
+        "float": 0.456,
+        "array": [
+            { "x": 1e2, "y": -3e4, "z": 5e-6, "0": 8e9 },
+            { "x": 1e2, "y": -3e4, "z": 5e-6, "0": 8e+9 },
+            { "x": 1e2, "y": -3e4, "z": 5e-6, "0": 8e9 }
+        ],
+        "object": {
+            "bool": true,
+            "string": "false",
+            "array": ["\"this-is-a-string\"\n"],
+            "null": null
+        },
+        "values": [ null, true, false ]
+    }

@@ -1,7 +1,26 @@
-// Copyright (C) 2020 Boyu Yang
-//
-// Licensed under the Apache License, Version 2.0 <LICENSE-APACHE or
-// http://www.apache.org/licenses/LICENSE-2.0> or the MIT license
-// <LICENSE-MIT or http://opensource.org/licenses/MIT>, at your
-// option. This file may not be copied, modified, or distributed
-// except according to those terms.
+mod error;
+pub(crate) mod utilities;
+
+pub use error::{Error, Result};
+
+pub fn normalize(raw_input: &str) -> Result<String> {
+    let input = raw_input.trim();
+    if input.is_empty() {
+        Ok(String::with_capacity(0))
+    } else {
+        let mut chars = input.chars().peekable();
+        match chars.peek() {
+            Some('{') => {
+                let mut output = String::new();
+                utilities::parse_object(&mut output, &mut chars)?;
+                Ok(output)
+            }
+            Some('[') => {
+                let mut output = String::new();
+                utilities::parse_array(&mut output, &mut chars)?;
+                Ok(output)
+            }
+            _ => Ok(input.to_owned()),
+        }
+    }
+}
