@@ -4,6 +4,7 @@ version = "0.1.0"
 authors = ["Boyu Yang <yangby@cryptape.com>"]
 edition = "2018"
 description = "Convert a non-standard JSON string into a normalized JSON string."
+documentation = "https://docs.rs/handwritten-json"
 homepage = "https://github.com/yangby-cryptape/rust-handwritten-json"
 repository = "https://github.com/yangby-cryptape/rust-handwritten-json"
 keywords = ["json"]
