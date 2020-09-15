@@ -1,0 +1,41 @@
+language: rust
+os: linux
+dist: focal
+rust:
+  - 1.46.0
+  - stable
+  - beta
+  - nightly
+env:
+  global:
+    - RUSTFLAGS='-F warnings'
+    - RUST_BACKTRACE=full
+stages:
+  - Check
+  - Test
+  - Audit
+jobs:
+  include:
+    - stage: Check
+      name: Format
+      install: cargo fmt --version || rustup component add rustfmt
+      script: cargo fmt --all -- --check
+    - stage: Check
+      name: Clippy
+      install: cargo clippy --version || rustup component add clippy
+      script: cargo clippy --all --all-targets --all-features
+    - stage: Test
+      os: osx
+    - stage: Test
+      os: windows
+    - stage: Audit
+      name: Dependencies
+      install: cargo audit --version || cargo install cargo-audit --locked
+      script: cargo audit --deny-warnings
+  allow_failures:
+    - rust: beta
+    - rust: nightly
+  fast_finish: true
+script:
+  - cargo build --verbose --all
+  - cargo test --verbose --all

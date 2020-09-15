@@ -11,3 +11,6 @@ categories = ["encoding"]
 license = "Apache-2.0 OR MIT"
 readme = "README.md"
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE-*"]
+
+[badges]
+travis-ci = { repository = "yangby-cryptape/rust-handwritten-json" }
