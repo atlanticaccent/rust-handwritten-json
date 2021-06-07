@@ -77,9 +77,12 @@ fn parse_key(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> {
 
 fn parse_nonstring(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> {
     let mut is_empty = true;
+    let mut numeric = true;
+    let mut temp_out = String::new();
     while let Some(ch) = chars.peek() {
+        numeric = numeric && ch.is_numeric();
         if ch.is_ascii_alphanumeric() || *ch == '+' || *ch == '-' || *ch == '.' {
-            output.push(*ch);
+            temp_out.push(*ch);
             chars.next();
             if is_empty {
                 is_empty = false;
@@ -91,6 +94,11 @@ fn parse_nonstring(output: &mut String, chars: &mut Peekable<Chars>) -> Result<(
     if is_empty {
         Err(Error::MissingNonString)
     } else {
+        if !numeric {
+            output.push_str(format!("\"{}\"", temp_out.trim_end_matches(" ")));
+        } else {
+            output.push_str(&temp_out);
+        }
         Ok(())
     }
 }
