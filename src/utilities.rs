@@ -53,6 +53,34 @@ fn parse_string(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> 
     }
 }
 
+fn parse_string_single(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> {
+    next_should_be(output, chars, '\'')?;
+    let mut escape = false;
+    let mut matched = false;
+    for ch in chars {
+        output.push(ch);
+        if escape {
+            escape = false;
+        } else {
+            match ch {
+                '\\' => {
+                    escape = true;
+                }
+                '\'' => {
+                    matched = true;
+                    break;
+                }
+                _ => {}
+            }
+        }
+    }
+    if matched {
+        Ok(())
+    } else {
+        Err(Error::MissingDoubleQuote)
+    }
+}
+
 fn parse_key(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> {
     let mut is_empty = true;
     output.push('"');
@@ -80,7 +108,7 @@ fn parse_nonstring(output: &mut String, chars: &mut Peekable<Chars>) -> Result<(
     let mut numeric = true;
     let mut temp_out = String::new();
     while let Some(ch) = chars.peek() {
-        numeric = numeric && ch.is_numeric();
+        numeric = numeric && (ch.is_numeric() || *ch == '.');
         if ch.is_ascii_alphanumeric() || *ch == '+' || *ch == '-' || *ch == '.' {
             temp_out.push(*ch);
             chars.next();
@@ -125,6 +153,7 @@ fn parse_value(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> {
             '{' => parse_object(output, chars),
             '[' => parse_array(output, chars),
             '"' => parse_string(output, chars),
+            '\'' => parse_string_single(output, chars),
             _ => parse_nonstring(output, chars),
         }
     } else {
