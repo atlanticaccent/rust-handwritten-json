@@ -25,8 +25,8 @@ fn next_should_be(output: &mut String, chars: &mut Peekable<Chars>, expected: ch
     Ok(())
 }
 
-fn parse_string(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> {
-    next_should_be(output, chars, '"')?;
+fn parse_string(output: &mut String, chars: &mut Peekable<Chars>, delimiter: char) -> Result<()> {
+    next_should_be(output, chars, delimiter)?;
     let mut escape = false;
     let mut matched = false;
     for ch in chars {
@@ -38,35 +38,7 @@ fn parse_string(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> 
                 '\\' => {
                     escape = true;
                 }
-                '"' => {
-                    matched = true;
-                    break;
-                }
-                _ => {}
-            }
-        }
-    }
-    if matched {
-        Ok(())
-    } else {
-        Err(Error::MissingDoubleQuote)
-    }
-}
-
-fn parse_string_single(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> {
-    next_should_be(output, chars, '\'')?;
-    let mut escape = false;
-    let mut matched = false;
-    for ch in chars {
-        output.push(ch);
-        if escape {
-            escape = false;
-        } else {
-            match ch {
-                '\\' => {
-                    escape = true;
-                }
-                '\'' => {
+                _ if ch == delimiter => {
                     matched = true;
                     break;
                 }
@@ -123,7 +95,9 @@ fn parse_nonstring(output: &mut String, chars: &mut Peekable<Chars>) -> Result<(
         Err(Error::MissingNonString)
     } else {
         if !numeric {
-            output.push_str(format!("\"{}\"", temp_out.trim_end_matches(" ")));
+            output.push('"');
+            output.push_str(temp_out.trim_end_matches(" "));
+            output.push('"');
         } else {
             output.push_str(&temp_out);
         }
@@ -132,8 +106,8 @@ fn parse_nonstring(output: &mut String, chars: &mut Peekable<Chars>) -> Result<(
 }
 
 fn parse_key_value(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> {
-    if chars.peek().map(|ch| *ch == '"').unwrap_or(false) {
-        parse_string(output, chars)?;
+    if let Some(ch) = chars.peek().filter(|ch| **ch == '"' || **ch == '\'').cloned() {
+        parse_string(output, chars, ch)?;
     } else {
         parse_key(output, chars)?;
     }
@@ -148,12 +122,11 @@ fn parse_key_value(output: &mut String, chars: &mut Peekable<Chars>) -> Result<(
 }
 
 fn parse_value(output: &mut String, chars: &mut Peekable<Chars>) -> Result<()> {
-    if let Some(ch) = chars.peek() {
-        match *ch {
+    if let Some(ch) = chars.peek().cloned() {
+        match ch {
             '{' => parse_object(output, chars),
             '[' => parse_array(output, chars),
-            '"' => parse_string(output, chars),
-            '\'' => parse_string_single(output, chars),
+            '"' | '\'' => parse_string(output, chars, ch),
             _ => parse_nonstring(output, chars),
         }
     } else {
